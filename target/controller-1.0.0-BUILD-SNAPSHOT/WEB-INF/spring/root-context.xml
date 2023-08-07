@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:jdbc="http://www.springframework.org/schema/jdbc"
+	xmlns:mybatis-spring="http://mybatis.org/schema/mybatis-spring"
+	xmlns:tx="http://www.springframework.org/schema/tx"
+	xsi:schemaLocation="http://www.springframework.org/schema/jdbc http://www.springframework.org/schema/jdbc/spring-jdbc-4.3.xsd
+		http://mybatis.org/schema/mybatis-spring http://mybatis.org/schema/mybatis-spring-1.2.xsd
+		http://www.springframework.org/schema/beans https://www.springframework.org/schema/beans/spring-beans.xsd
+		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.3.xsd
+		http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-4.3.xsd">
+	
+	<!-- Root Context: defines shared resources visible to all other web components -->
+	
+	<!-- MultipartResolver 설정 (파일 받아서 처리 하기)--> 
+	<bean id="multipartResolver" class="org.springframework.web.multipart.commons.CommonsMultipartResolver"> 
+		<property name="maxUploadSize" value="1073700000" /> <!-- 단위 : mb -->
+		<property name="maxInMemorySize" value="104857600" />
+	</bean>
+	
+	
+	<!-- mybatis 설정 시작 -->
+	<!-- dataSource mariadb로 설정 -->
+<!-- 	<bean id="dataSource" class="org.springframework.jdbc.datasource.DriverManagerDataSource"> -->
+<!-- 		<property name="driverClassName" value="org.mariadb.jdbc.Driver" /> -->
+<!-- 		<property name="url" value="jdbc:mariadb://localhost:3306/testdev" /> -->
+<!-- 		<property name="username" value="webmaster" /> -->
+<!-- 		<property name="password" value="12345" /> -->
+<!-- 	</bean> -->
+	
+	<!-- dataSource hikaricp로 설정 -->
+	<bean id="dataSource" class="com.zaxxer.hikari.HikariDataSource">
+		<constructor-arg ref="hikariConfig" />
+	</bean>
+	
+	 <!-- HikariCP Bean 설정 -->
+	<bean id="hikariConfig" class="com.zaxxer.hikari.HikariConfig"> 
+			<property name="idleTimeout" value="30000" />
+			<property name="connectionTimeout" value="3000" /> 
+			<property name="maxLifetime" value="400000" />
+			<property name="maximumPoolSize" value="300" /> 
+			<property name="minimumIdle" value="20" />
+			<property name="driverClassName" value="org.mariadb.jdbc.Driver" />
+			<property name="jdbcUrl" value="jdbc:mariadb://localhost:3306/testdev" />
+ 			<property name="username" value="webmaster" /> 
+			<property name="password" value="12345" /> 
+			<property name="poolName" value="MariaDB" />		
+	</bean>	
+	
+	<!-- sqlSessionFactory 설정 -->
+	<bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
+		<property name="dataSource" ref="dataSource" /> 	<!-- dataSource 참조 -->
+		<property name="configLocation" value="classpath:/mybatis-config.xml" />
+		<property name="mapperLocations" value="classpath:mappers/**/*Mapper.xml" /> 
+	</bean>
+	
+	<bean id="sqlSession" class="org.mybatis.spring.SqlSessionTemplate" destroy-method="clearCache">
+		<constructor-arg name="sqlSessionFactory" ref="sqlSessionFactory" />	<!-- 생성자를 통해 값을 입력 -->
+	</bean>
+	<!-- Mapper bean 검색 가능하도록 함-->
+	<mybatis-spring:scan base-package="com.MarisolBoard.mapper"/>	
+	<!-- mybatis 설정 끝 -->
+	
+	<!--  service bean 프로젝트 위치 알려주기  -->
+	<!--  Service  -->
+	<context:component-scan base-package="com.MarisolBoard.service"/>	<!--  여기 내에 스프링 bean이 있다는걸 알려주는 것  -->
+	<!--  DAO -->
+	<context:component-scan base-package="com.MarisolBoard.dao"/>	<!--  여기 내에 스프링 bean이 있다는걸 알려주는 것  -->
+	
+	
+<!-- 	   <context:property-placeholder location="classpath:/db-config/email.properties" />-->
+   <!-- 이메일 인증 관련 빈 등록 -->
+<!--    <bean id="mailSender" class="org.springframework.mail.javamail.JavaMailSenderImpl"> -->
+<!--       <property name="host" value="smtp.gmail.com" /> -->
+<!--       <property name="port" value="587" /> -->
+<!--       <property name="username" value="" /> -->
+<!--       <property name="password" value="" /> -->
+<!--       <property name="javaMailProperties"> -->
+<!--          <props> -->
+<!--                 <prop key="mail.transport.protocol">smtp</prop> -->
+<!--                 <prop key="mail.smtp.auth">true</prop> -->
+<!--                 gmail의 경우 보안문제 업데이트로 인해 SSLSocketFactory를 추가해야 smtp 사용 가능. -->
+<!--                 <prop key="mail.smtp.socketFactory.class">javax.net.ssl.SSLSocketFactory</prop> -->
+<!--                 <prop key="mail.smtp.starttls.enable">true</prop> -->
+<!--                 <prop key="mail.debug">true</prop> -->
+<!--                 <prop key="mail.smtp.ssl.trust">smtp.gmail.com</prop> -->
+<!-- 				<prop key="mail.smtp.ssl.protocols">TLSv1.2</prop> -->
+<!--             </props> -->
+<!--       </property> -->
+      
+<!--    </bean> -->
+	<!-- navermail설정 -->
+<bean id="mailSender" class="org.springframework.mail.javamail.JavaMailSenderImpl"> 
+ <property name="host" value="smtp.naver.com"/> <!-- 메이서버 호스트 -->
+ <property name="port" value="465"/> <!-- 메이서버 포트번호 -->
+ <property name="username" value="kyeong0521"/> <!-- 자신의 이메일 아이디 -->
+ <property name="password" value="HLZP3182J3UB"/> <!-- 자신의 비밀번호 -->
+   <!-- 보안연결 SSL과 관련된 설정 -->
+ <property name="javaMailProperties">
+  <props>
+  <prop key="mail.smtp.auth">true</prop>
+  <prop key="mail.smtp.starttls.enable">true</prop>
+  <prop key="mail.smtps.checkserveridentity">true</prop>
+  <prop key="mail.smtps.ssl.trust">host</prop>
+  <prop key="mail.debug">true</prop>
+  <prop key="mail.smtp.socketFactory.class">javax.net.ssl.SSLSocketFactory</prop>
+  </props>
+ </property>
+</bean>
+	
+	
+</beans>

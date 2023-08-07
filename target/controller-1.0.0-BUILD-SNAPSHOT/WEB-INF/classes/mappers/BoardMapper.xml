@@ -1,0 +1,176 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">  
+<mapper namespace="com.MarisolBoard.mappers.Board">
+	
+	<!--    게시물 목록보기  -->
+	<select id="list" parameterType="HashMap" resultType="com.MarisolBoard.dto.BoardVO"> 
+		<![CDATA[
+		SELECT @seq:=@seq+1 as seq, seqno, userid, writer, title, to_char(regdate,'YYYY-MM-DD HH24:MI:SS') as regdate, hitno, content
+			FROM (select @seq:=0) a, tbl_board 
+			WHERE writer LIKE CONCAT('%',#{keyword},'%')
+				OR title LIKE CONCAT('%',#{keyword},'%')
+				OR content LIKE CONCAT('%',#{keyword},'%')
+				ORDER BY seq DESC LIMIT ${startNum},#{postNum}
+		]]>	
+	</select>
+	
+	<!--    게시물 전체 개수 확인  -->
+	<select id="getTotalCount" parameterType="String" resultType="int"> 
+	<![CDATA[
+		SELECT count(*) FROM tbl_board 
+			WHERE writer LIKE CONCAT('%',#{keyword},'%')
+				OR title LIKE CONCAT('%',#{keyword},'%')
+				OR content LIKE CONCAT('%',#{keyword},'%')
+		]]>
+	</select>
+	
+	<!--    게시물 등록  -->
+	<insert id="write" parameterType="com.MarisolBoard.dto.BoardVO"> 
+		insert into tbl_board(userid,writer,title,content) values(#{userid}, #{writer}, #{title}, #{content})
+	</insert>
+	
+	<!-- 파일 업로드 정보 등록(동적 SQL 사용) -->
+	<insert id="fileInfoRegistry" parameterType="HashMap">
+	    insert into tbl_file (seqno, userid, org_filename, stored_filename, filesize, checkfile)
+	    <choose>
+	        <when test='kind.equals("I")'>
+	            values ((select auto_increment from information_schema.tables where table_name = 'tbl_board'
+	            and table_schema = DATABASE()), #{userid}, #{org_filename}, #{stored_filename}, #{filesize}, 'Y')
+	        </when>
+	        <when test='kind.equals("U")'>
+	            values (#{seqno},#{userid},#{org_filename},#{stored_filename},#{filesize}, 'Y')
+	        </when>
+	    </choose>
+	</insert>
+	
+	<!-- filesqeno으로 파일 정보 가져오기 -->
+	<select id="fileInfo" parameterType="int" resultType="com.MarisolBoard.dto.FileVO">
+		SELECT org_filename, stored_filename FROM tbl_file WHERE fileseqno = #{fileseqno}
+	</select>
+	
+	<!-- 게시물에 첨부된 파일 목록 보기 -->
+	<select id="fileListView" parameterType="int" resultType="com.MarisolBoard.dto.FileVO">
+		SELECT fileseqno, org_filename, filesize FROM tbl_file 
+			where (seqno = #{seqno} AND checkfile='Y')
+	</select>
+	
+	<!-- 게시물의 첨부파일 정보 삭제 -->
+	<update id="deleteFileList" parameterType="HashMap">
+		UPDATE tbl_file SET checkfile='N' WHERE 
+		<choose>
+			<when test='kind.equals("B")'>	<!-- 글이 삭제 됐을 때 -->
+				seqno = #{seqno}
+			</when>
+			<when test='kind.equals("F")'>	<!-- 수정으로 파일만 삭제 됐을 때 -->
+				fileseqno = #{fileseqno}
+			</when>
+		</choose>	
+	</update>
+	
+	<!-- 게시물 삭제를 위한 파일 목록 가져 오기 -->
+	<select id="deleteFileOnBoard" parameterType="int" resultType="com.MarisolBoard.dto.FileVO">
+		select stored_filename from tbl_file where seqno = #{seqno}
+	</select>
+<!-- 여려개의 파일 업로드처리를 위한 부분 끝 -->	
+
+	<!--    게시물 상세보기  -->
+	<select id="view" parameterType="int" resultType="com.MarisolBoard.dto.BoardVO"> 
+		SELECT 	seqno, userid, writer, title, to_char(regdate,'YYYY-MM-DD HH24:MI:SS') as regdate, hitno, content, likecnt, dislikecnt
+			FROM tbl_board WHERE seqno = #{seqno}
+	</select>
+	
+	<!--  	조회수 업데이트  -->
+	<update id="hitno" parameterType="com.MarisolBoard.dto.BoardVO"> 
+		update tbl_board set hitno= (select hitno from tbl_board where seqno = #{seqno}) +1 where seqno = #{seqno}
+	</update>
+	
+	<!--  	게시물 수정  -->
+	<update id="modify" parameterType="com.MarisolBoard.dto.BoardVO"> 
+		UPDATE tbl_board
+			SET title=#{title}, content=#{content}
+			WHERE seqno = #{seqno}
+	</update>
+	
+	<!--  	게시물 삭제  -->
+	<delete id="delete" parameterType="int"> 
+		delete from tbl_board where seqno=#{seqno}
+	</delete>
+
+<!-- 좋아요 싫어요 처리 -->
+	<!-- 좋아요/싫어요 확인 내용 가져 오기-->
+	<select id="likeCheckView" parameterType="HashMap" resultType="com.MarisolBoard.dto.LikeVO">
+		SELECT mylikecheck, mydislikecheck FROM tbl_like WHERE seqno = #{seqno} AND userid = #{userid}
+	</select>
+	
+	<!-- 좋아요/싫어요 갯수 수정하기 -->
+	<select id="boardLikeUpdate" parameterType="HashMap">
+		UPDATE tbl_board SET likecnt = #{likecnt}, dislikecnt = #{dislikecnt} WHERE seqno = #{seqno}
+	</select>
+	
+	<!-- 좋아요/싫어요 확인 등록하기 -->
+	<insert id="likeCheckRegistry" parameterType="HashMap">
+		INSERT INTO tbl_like (seqno,userid,mylikecheck,mydislikecheck,likedate,dislikedate) 
+			VALUES (#{seqno},#{userid},#{mylikecheck},#{mydislikecheck},#{likedate},#{dislikedate})
+	</insert>
+	
+	<!-- 좋아요/싫어요 확인 수정하기 -->
+	<update id="likeCheckUpdate" parameterType="HashMap">
+		UPDATE tbl_like SET mylikecheck = #{mylikecheck},
+							mydislikecheck = #{mydislikecheck},
+							likedate = #{likedate},
+							dislikedate = #{dislikedate}
+						WHERE userid = #{userid} AND seqno = #{seqno}
+	</update>	
+
+<!-- 댓글 처리 -->	
+	<!-- 댓글 보기 -->
+	<select id="replyView" parameterType="com.MarisolBoard.dto.ReplyVO" resultType="com.MarisolBoard.dto.ReplyVO">
+		SELECT replyseqno, replywriter, replycontent, to_char(replyregdate,'YYYY-MM-DD HH24:MI:SS') AS replyregdate,
+		userid,seqno from tbl_reply WHERE seqno = #{seqno}    
+			ORDER BY replyseqno DESC
+	</select> 
+	
+	<!-- 댓글 등록 -->
+	<insert id="replyRegistry" parameterType="com.MarisolBoard.dto.ReplyVO">
+		insert into tbl_reply (replywriter, replycontent, userid, seqno) values  
+			(#{replywriter},#{replycontent},#{userid},#{seqno})
+	</insert>
+	
+	<!-- 댓글 수정 -->
+	<update id="replyUpdate" parameterType="com.MarisolBoard.dto.ReplyVO">
+		update tbl_reply set replycontent = #{replycontent}  
+		where replyseqno = #{replyseqno}
+	</update>
+	
+	<!-- 댓글 삭제 -->
+	<delete id="replyDelete" parameterType="com.MarisolBoard.dto.ReplyVO">
+		delete from tbl_reply where replyseqno = #{replyseqno}
+	</delete>
+
+<!-- 게시물 이동 -->	
+	<!-- 이전 게시물 번호-->
+	<select id="pre_seq" parameterType="HashMap" resultType="int">
+		<![CDATA[
+			SELECT IFNULL(min(seqno), 0) FROM tbl_board 
+						WHERE seqno > #{seqno} 
+						AND (writer LIKE CONCAT('%',#{keyword},'%')
+							OR title LIKE CONCAT('%',#{keyword},'%')
+							OR content LIKE CONCAT('%',#{keyword},'%'))
+		]]>
+	</select>
+	
+	<!-- 다음 게시물 번호-->
+	<select id="next_seq" parameterType="HashMap" resultType="int">
+		<![CDATA[
+			SELECT IFNULL(max(seqno),0) FROM tbl_board 
+					WHERE seqno < #{seqno}
+					AND (writer LIKE CONCAT('%',#{keyword},'%')
+						OR title LIKE CONCAT('%',#{keyword},'%')
+						OR content LIKE CONCAT('%',#{keyword},'%'))
+		]]>
+	</select>
+	
+
+</mapper>

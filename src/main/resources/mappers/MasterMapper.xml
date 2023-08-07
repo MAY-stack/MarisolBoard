@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper  PUBLIC "-//mybatis.org//DTD Config 3.0//EN"  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+  
+<mapper namespace="com.MarisolBoard.mappers.Master">
+
+	<!-- 삭제할 파일 갯수 계산 -->
+	<select id="fileDeleteCount" resultType="int">
+		SELECT count(*) FROM tbl_file WHERE checkfile = 'N'
+	</select>
+	
+	<!-- 삭제할 파일 정보 목록  -->
+	<select id="fileDeleteList" resultType="com.MarisolBoard.dto.FileVO">
+		SELECT * FROM tbl_file WHERE checkfile = 'N' ORDER BY fileseqno;
+	</select>
+
+	<!-- 파일 정보 삭제 -->
+	<delete id="deleteFile" parameterType="int">
+		delete from tbl_file where fileseqno=#{fileseqno}
+	</delete>
+</mapper>

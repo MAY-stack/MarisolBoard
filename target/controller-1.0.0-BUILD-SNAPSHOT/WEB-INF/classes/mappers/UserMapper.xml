@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+  
+  <mapper namespace="com.MarisolBoard.mappers.User">
+  
+	<!-- 사용자 등록 -->
+	<insert id="userReg" parameterType="com.MarisolBoard.dto.UserVO">
+		INSERT INTO tbl_user(userid,username,password,gender,hobby,job,description,
+								zipcode, address, telno, email, authkey, role, org_filename, stored_filename, filesize,
+								addr1, addr2 ) 
+			VALUES(#{userid}, #{username}, #{password}, #{gender}, #{hobby}, #{job}, #{description},
+					#{zipcode}, #{address}, #{telno}, #{email}, #{authkey}, 'USER',
+					#{org_filename}, #{stored_filename}, #{filesize}, #{addr1}, #{addr2} )
+	</insert>
+
+	<!-- 	아이디 존재 여부 체크 -->
+	<select id="idCheck" parameterType="String" resultType="int">
+		select count(*) from tbl_user where userid =#{userid}
+	<!-- 	count가 1이면 이미 사용 중인 아이디, 0이면 아이디 사용 가능 -->
+	</select>
+	
+	<!-- 	아이디에 따른 비밀번호 확인 -->
+	<select id="pwCheck" parameterType="String" resultType="String">
+		select password from tbl_user where userid =#{userid}
+	</select>
+	
+	<!-- 이름, 연락처로 정보 찾기 -->
+	<select id="findUserInfoByNameTelno" parameterType="HashMap" resultType="com.MarisolBoard.dto.UserVO">
+		SELECT * FROM tbl_user WHERE username = #{username} AND telno =#{telno};
+	</select>
+	
+	<!--  비밀번호 변경 -->
+	<update id="modifyPw" parameterType="com.MarisolBoard.dto.UserVO">
+	    UPDATE tbl_user
+	        SET	pw_set_date=#{pw_set_date},
+	            password=#{password}
+	        WHERE userid=#{userid}
+	</update>
+	
+	<!-- 	사용자 정보 -->
+	<select id="userInfo" parameterType="String" resultType="com.MarisolBoard.dto.UserVO">
+		SELECT * FROM tbl_user WHERE userid = #{userid}
+	</select>
+	
+	<!--  사용자 정보 수정 -->
+	<update id="modifyUserInfo" parameterType="com.MarisolBoard.dto.UserVO">
+		UPDATE tbl_user
+		    SET	hobby=#{hobby}, job=#{job}, description=#{description},
+		        zipcode=#{zipcode}, address=#{address}, telno=#{telno},
+		        email=#{email}, role=#{role}, org_filename=#{org_filename},
+		        stored_filename=#{stored_filename}, filesize=#{filesize},
+		        addr1=#{addr1}, addr2=#{addr2}
+		    WHERE userid=#{userid}
+	</update>
+	
+	<!-- authkey 업데이트 -->
+	<update id="authKeyUpdate" parameterType="com.MarisolBoard.dto.UserVO">
+		UPDATE tbl_user SET authkey=#{authkey} WHERE userid=#{userid}
+	</update>
+	
+	<!-- authkey의 사용자 정보 -->
+	<select id="userInfoByAuthkey" parameterType="String" resultType="com.MarisolBoard.dto.UserVO">
+		SELECT userid, password, pw_set_date, username, authkey, role FROM tbl_user WHERE authkey = #{authkey}
+	</select>
+	
+	
+	<!-- 우편번호 행 최대 갯수 계산 -->
+	<select id="addrTotalCount" parameterType="string" resultType="int">
+		SELECT count(*) FROM tbl_addr 
+			WHERE road LIKE CONCAT('%',#{addrSearch},'%')
+			OR building LIKE CONCAT('%',#{addrSearch},'%')
+	</select>
+
+	<!-- 우편번호 검색 -->
+	<select id="addrSearch" parameterType="HashMap" resultType="com.MarisolBoard.dto.AddressVO">
+		SELECT zipcode, province, road, building, oldaddr 
+		FROM tbl_addr
+		WHERE road LIKE CONCAT('%',#{addrSearch},'%') 
+			OR building LIKE CONCAT('%',#{addrSearch},'%')
+		ORDER BY zipcode
+		LIMIT #{startPoint}, #{postNum}		
+	</select>
+  
+  </mapper>
