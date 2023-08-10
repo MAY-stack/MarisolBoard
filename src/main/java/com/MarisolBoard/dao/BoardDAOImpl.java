@@ -25,7 +25,7 @@ public class BoardDAOImpl implements BoardDAO {
 	//게시물 목록 보기
 	@Override
 	public List<BoardVO> list(int startNum, int postNum, String keyword) {
-		Map<String,Object> data = new HashMap<>();
+		Map<String,Object> data = new HashMap<String,Object>();
 		data.put("startNum", startNum);
 		data.put("postNum", postNum);
 		data.put("keyword", keyword);
@@ -112,7 +112,7 @@ public class BoardDAOImpl implements BoardDAO {
 	@Override
 	public LikeVO likeCheckView(int seqno,String userid) throws Exception {
 		
-		Map<String,Object> data = new HashMap<>();
+		Map<String,Object> data = new HashMap<String,Object>();
 		data.put("seqno", seqno);
 		data.put("userid", userid);
 		return sql.selectOne(namespace + ".likeCheckView", data);
@@ -121,7 +121,7 @@ public class BoardDAOImpl implements BoardDAO {
 	//좋아요/싫어요 갯수 수정하기
 	@Override
 	public void boardLikeUpdate(int seqno, int likecnt, int dislikecnt) throws Exception {
-		Map<String,Object> data = new HashMap<>();
+		Map<String,Object> data = new HashMap<String,Object>();
 		data.put("seqno", seqno);
 		data.put("likecnt", likecnt);
 		data.put("dislikecnt", dislikecnt);
@@ -167,7 +167,7 @@ public class BoardDAOImpl implements BoardDAO {
 	//이전 게시물 번호
 	@Override
 	public int pre_seq(int seqno, String keyword) {
-		Map<String, Object> data = new HashMap<>();
+		Map<String, Object> data = new HashMap<String,Object>();
 		data.put("seqno", seqno);
 		data.put("keyword", keyword);
 		return sql.selectOne(namespace + ".pre_seq", data);
@@ -176,7 +176,7 @@ public class BoardDAOImpl implements BoardDAO {
 	//다음 게시물 번호
 	@Override
 	public int next_seq(int seqno, String keyword) {
-		Map<String, Object> data = new HashMap<>();
+		Map<String, Object> data = new HashMap<String,Object>();
 		data.put("seqno", seqno);
 		data.put("keyword", keyword);
 		return sql.selectOne(namespace + ".next_seq", data);
