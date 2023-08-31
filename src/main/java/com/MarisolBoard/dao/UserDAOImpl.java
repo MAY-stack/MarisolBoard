@@ -42,7 +42,7 @@ public class UserDAOImpl implements UserDAO {
 	@Override
 	public UserVO findUserInfoByNameTelno(String username, String telno) {
 		
-		Map<String, String> data = new HashMap<>();
+		Map<String, String> data = new HashMap<String, String>();
 		data.put("username", username);
 		data.put("telno", telno);
 		
@@ -88,7 +88,7 @@ public class UserDAOImpl implements UserDAO {
 	@Override
 	public List<AddressVO> addrSearch(int startPoint, int postNum, String addrSearch) {
 
-		Map<String,Object> data = new HashMap<>();
+		Map<String,Object> data = new HashMap<String,Object>();
 		data.put("startPoint", startPoint);
 		data.put("postNum",postNum);
 		data.put("addrSearch", addrSearch);

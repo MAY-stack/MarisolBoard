@@ -43,12 +43,12 @@ public class MasterController {
 		
 		List<FileVO> filedeleteList = service.fileDeleteList();
 		
-		List<Map<String,String>> data = new ArrayList<>();
+		List<Map<String,String>> data = new ArrayList<Map<String,String>>();
 		
 		for(FileVO f : filedeleteList) {
 			
 			//웹브라우저에 삭제할 파일 정보 전송을 위해 파일 정보를 저장
-			Map<String,String> result = new HashMap<>();
+			Map<String,String> result = new HashMap<String,String>();
 			result.put("count", Integer.toString(count));
 			result.put("org_filename", f.getOrg_filename());
 			

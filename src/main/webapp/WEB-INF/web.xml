@@ -44,7 +44,7 @@
     <description></description>
     <display-name>UserDAO</display-name>
     <servlet-name>UserDAO</servlet-name>
-    <servlet-class>com.SFTest.dao.UserDAO</servlet-class>
+    <servlet-class>com.MarisolBoard.dao.UserDAO</servlet-class>
   </servlet>
   <servlet-mapping>
     <servlet-name>UserDAO</servlet-name>

@@ -3,8 +3,8 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>com.MarisolBoard</groupId>
-	<artifactId>marisolboard</artifactId>
-	<name>MarisolBoard</name>
+	<artifactId></artifactId>
+	<name>SFTest</name>
 	<packaging>war</packaging>
 	<version>1.0.0-BUILD-SNAPSHOT</version>
 	<properties>
@@ -222,7 +222,6 @@
 		
 	</dependencies>
     <build>
-    	<finalName>MarisolBoard</finalName>
         <plugins>
             <plugin>
                 <artifactId>maven-eclipse-plugin</artifactId>

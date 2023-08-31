@@ -89,7 +89,7 @@
 									<td colspan="4" align="center">
 										<input type="file" name="fileUpload" id="profileImage" style="display:none;" />
 										<div class="imageZone" id="imageZone" style="width:800px; height:auto; min-height:250px; border:dotted 1px rgba(88, 88, 88, 0.5); text-align: center; vertical-align:middle;">
-											<img src="/profile/${user.stored_filename}">
+											<img src="/home/ec2-user/Repository/profile/${user.stored_filename}">
 										</div>
 										<span>프로필 사진을 클릭하면 사진을 변경할 수 있습니다.</span>
 									    <span id="img_cancle"></span>

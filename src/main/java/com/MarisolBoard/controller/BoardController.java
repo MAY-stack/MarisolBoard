@@ -2,7 +2,8 @@ package com.MarisolBoard.controller;
 
 import java.io.File;
 import java.net.URLEncoder;
-import java.time.LocalDateTime;
+//import java.time.LocalDateTime;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -112,7 +113,7 @@ public class BoardController {
 					//file.delete();
 					
 					//파일 테이블에서 파일 정보 삭제 //게시물 수정에서 삭제할 파일 목록 전송 되면 이 값을 받아서 파일 정보(in tbl_file)를 하나씩 삭제하는 deleteFileList 실행
-					Map<String,Object> data = new HashMap<>();
+					Map<String,Object> data = new HashMap<String,Object>();
 					data.put("kind", "F");	 
 					data.put("fileseqno", deleteFileList[i]);
 					service.deleteFileList(data);
@@ -123,7 +124,8 @@ public class BoardController {
 		
 		if(!multipartFile.isEmpty()) {
 
-			String webPath = "c:\\Repository\\upload\\";
+			//String webPath = "c:\\Repository\\upload\\";
+			String webPath = "/home/ec2-user/Repository/upload/";
 			
 			File targetFile = null; 
 			Map<String,Object> fileInfo = null;		
@@ -144,7 +146,7 @@ public class BoardController {
 					targetFile.mkdirs();
 				mpr.transferTo(targetFile);
 				
-				fileInfo = new HashMap<>();
+				fileInfo = new HashMap<String,Object>();
 				fileInfo.put("org_filename",org_filename);
 				fileInfo.put("stored_filename", stored_filename);
 				fileInfo.put("filesize", filesize);
@@ -235,16 +237,19 @@ public class BoardController {
 		System.out.println(seqno);
 		String userid = String.valueOf(likeCheckData.get("userid"));
 		System.out.println(userid);
-		int checkCnt = (int) likeCheckData.get("checkCnt");
+		int checkCnt = Integer.parseInt(likeCheckData.get("checkCnt").toString());
 		System.out.println(checkCnt);
 
 		//현재 날짜, 시간 구해서 좋아요/싫어요 한 날짜/시간 입력 및 수정
 		String likeDate = "";
 		String dislikeDate = "";
-		if(likeCheckData.get("mylikecheck").equals("Y")) 
-			likeDate = LocalDateTime.now().toString();
-		else if(likeCheckData.get("mydislikecheck").equals("Y")) 
-			dislikeDate = LocalDateTime.now().toString();
+		Date date = new Date();
+		if(likeCheckData.get("mylikecheck").equals("Y"))
+			likeDate = date.toString();
+			//likeDate = LocalDateTime.now().toString();
+		else if(likeCheckData.get("mydislikecheck").equals("Y"))
+			dislikeDate = date.toString();
+			//dislikeDate = LocalDateTime.now().toString();
 
 		likeCheckData.put("likedate", likeDate);
 		likeCheckData.put("dislikedate", dislikeDate);
@@ -279,14 +284,22 @@ public class BoardController {
 	@ResponseBody
 	@PostMapping("/board/reply")
 	public List<ReplyVO> postReply(@RequestBody ReplyVO reply, @RequestParam("option") String option)throws Exception{
-		switch(option) {
-		case "L" : service.replyView(reply); //댓글 보기
+
+		/*옵션 int로 전환 */
+		int number = 0;
+		if(option.equals("L")) number = 1;
+		else if(option.equals("I")) number = 2;
+		else if(option.equals("U")) number = 3;
+		else if(option.equals("D")) number = 4;
+
+		switch(number) {
+		case 1 : service.replyView(reply); //댓글 보기
 					break;
-		case "I" : service.replyRegistry(reply); //댓글 등록
+		case 2 : service.replyRegistry(reply); //댓글 등록
 					break;
-		case "U" : service.replyUpdate(reply); //댓글 수정
+		case 3 : service.replyUpdate(reply); //댓글 수정
 					break;
-		case "D" : service.replyDelete(reply); //댓글 삭제
+		case 4 : service.replyDelete(reply); //댓글 삭제
 					break;
 		}
 		return service.replyView(reply);
@@ -298,7 +311,8 @@ public class BoardController {
 	@GetMapping("/board/filedownload")
 	public void fileDownload(@RequestParam("fileseqno") int fileseqno, Model model, HttpServletResponse rs) throws Exception {
 		System.out.println("fdcontroller");
-		String webPath = "c:\\Repository\\upload\\";
+		//String webPath = "c:\\Repository\\upload\\";
+		String webPath = "/home/ec2-user/Repository/upload/";
 		String realPath = ctx.getRealPath(webPath);	//서버 내 실제 경로
 		String org_filename = service.fileInfo(fileseqno).getOrg_filename(); 
 		String stored_filename = service.fileInfo(fileseqno).getStored_filename();	//seqno로 스토어드 파일네임 찾기
@@ -322,7 +336,7 @@ public class BoardController {
 	@GetMapping("/board/delete")
 	public String getDelete(@RequestParam("seqno") int seqno) throws Exception {
 
-		Map<String,Object> data = new HashMap<>();
+		Map<String,Object> data = new HashMap<String,Object>();
 		data.put("kind", "B");
 		data.put("seqno", seqno);
 		service.delete(seqno);	//글삭제
@@ -376,7 +390,7 @@ public class BoardController {
 				//file.delete();
 				
 				//파일 테이블에서 파일 정보 삭제
-				Map<String,Object> data = new HashMap<>();
+				Map<String,Object> data = new HashMap<String,Object>();
 				data.put("kind", "F");
 				data.put("fileseqno", deleteFileList[i]);
 				service.deleteFileList(data);

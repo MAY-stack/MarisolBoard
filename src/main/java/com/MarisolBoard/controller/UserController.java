@@ -3,8 +3,13 @@ package com.MarisolBoard.controller;
 import java.io.File;
 import java.io.IOException;
 import java.net.URLEncoder;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
+//import java.time.LocalDateTime;
+import java.text.DateFormat;
+import java.text.FieldPosition;
+import java.text.ParsePosition;
+import java.util.Date;
+//import java.time.format.DateTimeFormatter;
+import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -88,8 +93,11 @@ public class UserController {
 		
 		user.setPassword(pwdEncoder.encode(password)); // 비밀번호 암호화 처리
 		System.out.println(pwdEncoder.encode(password));
-		
-		user.setPw_set_date(LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
+
+		Date date = new Date();
+		//user.setPw_set_date(LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
+		user.setPw_set_date(date.toString());
+
 		service.modifyPw(user);		
 		
 		return "{\"message\":\"good\"}";
@@ -117,7 +125,10 @@ public class UserController {
 			String endcodedAuthcode = pwdEncoder.encode(tempPW);
 			member.setPassword(endcodedAuthcode); // 임시 비밀번호 암호화 처리
 			member.setAuthcode(endcodedAuthcode);
-			member.setPw_set_date(LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
+			//member.setPw_set_date(LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
+
+			Date date = new Date();
+			member.setPw_set_date(date.toString());
 			
 			service.modifyPw(member);
 			
@@ -268,7 +279,7 @@ public class UserController {
 		Page page = new Page();
 		
 		int totalCount = service.addrTotalCount(addrSearch);
-		List<AddressVO> list = new ArrayList<>();
+		List<AddressVO> list = new ArrayList<AddressVO>();
 		list = service.addrSearch(startPoint, postNum, addrSearch);
 
 		model.addAttribute("list", list);
@@ -304,9 +315,18 @@ public class UserController {
 				
 				//비밀번호 변경 기간 확인
 				String pwc = "N";
-				LocalDateTime pwSetDateTime = LocalDateTime.parse(userInfoByAK.getPw_set_date(),
-			        	DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
-				if(LocalDateTime.now().isAfter(pwSetDateTime.plusDays(30))) pwc = "Y";
+
+//				LocalDateTime pwSetDateTime = LocalDateTime.parse(userInfoByAK.getPw_set_date(),
+//			        	DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+//				if(LocalDateTime.now().isAfter(pwSetDateTime.plusDays(30))) pwc = "Y";
+
+
+				//----//
+//				Date pwSetDateTime = new Date();
+//
+//				LocalDateTime pwSetDateTime = LocalDateTime.parse(userInfoByAK.getPw_set_date(),
+//						DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+//				if(LocalDateTime.now().isAfter(pwSetDateTime.plusDays(30))) pwc = "Y";
 				
 				session.setAttribute("pwc", pwc);
 				
@@ -334,9 +354,9 @@ public class UserController {
 					
 					//비밀번호 변경 기간 확인
 					String pwc = "N";
-					LocalDateTime pwSetDateTime = LocalDateTime.parse(member.getPw_set_date(),
-				        	DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
-					if(LocalDateTime.now().isAfter(pwSetDateTime.plusDays(30))) pwc = "Y";
+//					LocalDateTime pwSetDateTime = LocalDateTime.parse(member.getPw_set_date(),
+//				        	DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+//					if(LocalDateTime.now().isAfter(pwSetDateTime.plusDays(30))) pwc = "Y";
 					
 					session.setAttribute("pwc", pwc);
 					
@@ -369,7 +389,7 @@ public class UserController {
 	public String getPwextend(HttpSession session, Model model, RedirectAttributes rd ) throws Exception {
 		String userid = (String)session.getAttribute("userid");
 		UserVO user = service.userInfo(userid);
-		user.setPw_set_date(LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
+//		user.setPw_set_date(LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
 				
 		service.modifyUserInfo(user);
 		session.setAttribute("pwex", "N");
@@ -399,18 +419,20 @@ public class UserController {
         int rightLimit = 122; // letter 'z'
         int targetStringLength = length;
         Random random = new Random();
-        String randomString = random.ints(leftLimit, rightLimit + 1)
-                                    .filter(i -> (i <= 57 || i >= 65) && (i <= 90 || i >= 97))
-                                    .limit(targetStringLength)
-                                    .collect(StringBuilder::new, StringBuilder::appendCodePoint, StringBuilder::append)
-                                    .toString();
+		String randomString = "tempPassword";
+//        String randomString = random.ints(leftLimit, rightLimit + 1)
+//                                    .filter(i -> (i <= 57 || i >= 65) && (i <= 90 || i >= 97))
+//                                    .limit(targetStringLength)
+//                                    .collect(StringBuilder::new, StringBuilder::appendCodePoint, StringBuilder::append)
+//                                    .toString();
         return randomString;
     }
 
 	//프로필 사진 업로드 메서드
 	public String ProfileUpload(UserVO user, List<MultipartFile> multipartFile) throws IllegalStateException, IOException{
 
-		String WebPath = "c:\\Repository\\profile\\";
+		//String WebPath = "c:\\Repository\\profile\\";
+		String WebPath = "/home/ec2-user/Repository/profile/";
 		String realPath = WebPath;//ctx.getRealPath(webPath);	//서버 내 실제 경로
 
 		if(!multipartFile.isEmpty()) {
