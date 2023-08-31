@@ -40,7 +40,7 @@
 
 ### 📝 요구사항 정의 및 페이지·기능 명세서
 
-![요구사항 정의 및 페이지·기능 명세서](images/functional_specification.png)
+![요구사항 정의 및 페이지·기능 명세서](images/documents/functional_specification.png)
 
 ### 📝 테이블 명세서 및 ERD
 
